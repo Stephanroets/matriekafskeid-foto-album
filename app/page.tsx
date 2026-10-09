@@ -26,7 +26,7 @@ export default async function HomePage() {
             <p className="mb-5 text-xs uppercase tracking-[0.38em] text-[#0BE0E6]">Private photo collection</p>
             <h1 className="max-w-4xl font-serif text-5xl leading-[0.98] md:text-8xl">Matric Farewell</h1>
             <p className="mt-7 max-w-2xl text-base leading-7 text-white/55 md:text-lg">
-              One evening, five chapters. Choose a section below to view the photographs.
+              Explore the photo collection from this special evening.
             </p>
           </div>
         </section>
