@@ -67,7 +67,16 @@ export async function listSectionPhotos(sectionSlug: string, r2Prefix?: string):
 
   const images = objects
     .filter((object) => object.Key && IMAGE_EXTENSIONS.test(object.Key))
-    .sort((a, b) => (b.LastModified?.getTime() ?? 0) - (a.LastModified?.getTime() ?? 0))
+    .sort((a, b) => {
+      // Natural sort by filename for stable chronological ordering
+      const keyA = a.Key ?? ""
+      const keyB = b.Key ?? ""
+      const nameA = keyA.split("/").pop() ?? keyA
+      const nameB = keyB.split("/").pop() ?? keyB
+      
+      // Natural sort: handles photo1, photo2, photo10 correctly
+      return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: "base" })
+    })
 
   return Promise.all(
     images.map(async (object) => {

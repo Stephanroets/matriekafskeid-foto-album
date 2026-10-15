@@ -26,15 +26,16 @@ export async function GET(
 ) {
   try {
     const { key } = await params
+    const decodedKey = decodeURIComponent(key)
     const bucket = env("R2_BUCKET_NAME")
 
     // Validate the key is an image file
-    if (!IMAGE_EXTENSIONS.test(key)) {
+    if (!IMAGE_EXTENSIONS.test(decodedKey)) {
       return NextResponse.json({ error: "Invalid file type" }, { status: 400 })
     }
 
     const client = getR2Client()
-    const command = new GetObjectCommand({ Bucket: bucket, Key: key })
+    const command = new GetObjectCommand({ Bucket: bucket, Key: decodedKey })
     const response = await client.send(command)
 
     if (!response.Body) {
@@ -42,7 +43,7 @@ export async function GET(
     }
 
     // Get the filename from the key
-    const fileName = key.split("/").pop() || key
+    const fileName = decodedKey.split("/").pop() || decodedKey
 
     // Convert the stream to a buffer
     const chunks: Uint8Array[] = []
@@ -56,10 +57,12 @@ export async function GET(
     const contentType = response.ContentType || "image/jpeg"
 
     // Return the file with Content-Disposition: attachment to force download
+    // Use RFC 5987 encoding for filenames with special characters
+    const encodedFileName = encodeURIComponent(fileName)
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Disposition": `attachment; filename="${fileName}"; filename*=UTF-8''${encodedFileName}`,
         "Cache-Control": "private, max-age=3600",
       },
     })
